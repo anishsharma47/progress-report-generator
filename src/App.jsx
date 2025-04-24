@@ -5,41 +5,44 @@ import { gradeRemarks, students } from "./utils/staticData";
 
 const App = () => {
   const reportRefs = useRef([]);
-
   const handleDownload = (index) => {
     const element = reportRefs.current[index];
     if (element) {
-      html2pdf()
-        .set({
-          margin: 0.5,
-          filename: `${students[index].name.replace(/\s+/g, "_")}_Report.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2 },
-          jsPDF: {
-            unit: "in",
-            format: [18, 13],
-            orientation: "portrait",
-          },
-        })
-        .from(element)
-        .save();
+      const opt = {
+        margin: 0.5,
+        filename: `${students[index].name.replace(/\s+/g, "_")}_Report.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: {
+          unit: "in",
+          format: [11,9.5],
+          orientation: "portrait",
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+      };
+  
+      html2pdf().set(opt).from(element).save();
     }
   };
+  
+  
 
   return students.map((student, index) => {
     const numOfMarks = student?.unitTest?.[index]?.marks?.length - 1;
 
-    const verticalSums = Array.from({ length: numOfMarks }, (_, i) =>
-      student?.unitTest?.reduce((sum, subj) => sum + subj.marks[i], 0)
+    const verticalSums = Array.from({ length: 5 }, (_, i) =>
+      student?.unitTest?.reduce((sum, subj) => sum + subj?.marks[i], 0)
     );
+
+    console.log('sdet>>>',verticalSums)
     const lastColumnSum = student?.unitTest?.reduce((sum, subject) => {
-      const lastMark = subject.marks[subject.marks.length - 1];
+      const lastMark = subject?.marks[subject?.marks?.length - 1];
       return sum + lastMark;
     }, 0);
 
     return (
-      <div key={index} className="space-y-2">
-        <div ref={(el) => (reportRefs.current[index] = el)}>
+      <div key={index} >
+        <div style={{ pageBreakInside: 'avoid' }} ref={(el) => (reportRefs.current[index] = el)}>
           <ProgressReport
             studentDetail={student}
             verticalSums={verticalSums}
@@ -61,13 +64,13 @@ const App = () => {
 
 const ProgressReport = ({ studentDetail, verticalSums, lastColumnSum }) => {
   return (
-    <div className="max-w-fit mx-auto border p-4 text-xs font-serif">
+    <div className="max-w-fit min-h-full mx-auto border p-4 text-xs font-serif">
       {/* Header */}
       <div className="text-center border-b pb-2 mb-2 space-y-1 relative">
         <h1 className="text-2xl font-bold uppercase ">
           Adarsh vidya niketan dariba
         </h1>
-        <p className="text-[14px]">Dariba Near by Sanwaliya Seth Mandir</p>
+        <p className="text-[14px]">Near by Sanwaliya Seth Mandir</p>
         {/* <p className="text-[14px]">
           Teh. Railmagra, Dist. Rajsamand, PIN - 313211
         </p> */}
@@ -105,7 +108,7 @@ const ProgressReport = ({ studentDetail, verticalSums, lastColumnSum }) => {
           </p>
           <p className="text-[13px]">
             <strong className="text-[14px]">Class:</strong>{" "}
-            {studentDetail?.class}
+            {'LKG'}
           </p>
         </div>
         <div className="space-y-1 text-right uppercase flex flex-col items-start">
@@ -235,13 +238,13 @@ const ProgressReport = ({ studentDetail, verticalSums, lastColumnSum }) => {
               {studentDetail?.gk}
             </td> */}
             <td className="border border-black p-2 font-sans text-[14px]">
-              {studentDetail?.totalMarks}
+              600
             </td>
             <td className="border border-black p-2 font-sans text-[14px]">
-              {studentDetail?.marksObtained}
+              {lastColumnSum}
             </td>
             <td className="border border-black p-2 font-sans text-[14px]">
-              {studentDetail?.percentage}
+              {(lastColumnSum/600*100).toFixed(1)}
             </td>
             <td className="border border-black p-2 font-sans text-[14px]">
               {studentDetail?.grade}
@@ -253,10 +256,10 @@ const ProgressReport = ({ studentDetail, verticalSums, lastColumnSum }) => {
               {studentDetail?.attendance}
             </td>
             <td className="border border-black p-2 font-sans text-[14px]">
-              {studentDetail?.division}
+            First
             </td>
             <td className="border border-black p-2 font-sans text-[14px]">
-              {studentDetail?.result}
+            Pass
             </td>
           </tr>
         </tbody>
@@ -346,12 +349,12 @@ const ProgressReport = ({ studentDetail, verticalSums, lastColumnSum }) => {
       <div className="mb-2 uppercase text-nowrap">
         <p className="text-[14px]">
           <strong className="text-[16px]">Teacher's Remark:</strong>{" "}
-          {gradeRemarks[studentDetail.grade]}
+          {gradeRemarks[studentDetail.grade]}  
         </p>
       </div>
 
       {/* Promotion */}
-      <p className="font-semibold mb-2 text-[16px]">PROMOTED TO II</p>
+      <p className="font-semibold mb-2 text-[16px]">PROMOTED TO UKG</p>
 
       <div className="w-full mx-auto mt-6">
         <table className="w-full border border-black text-center text-sm">

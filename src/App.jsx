@@ -1,5 +1,7 @@
 import React, { useRef } from "react";
 import html2pdf from "html2pdf.js";
+import LOGO from "./assets/logo.png";
+import { gradeRemarks, students } from "./utils/staticData";
 
 const App = () => {
   const reportRefs = useRef([]);
@@ -24,184 +26,66 @@ const App = () => {
     }
   };
 
-  const students = [
-    {
-      name: "JIGNSHUV MEENA",
-      mother: "REKHA MEENA",
-      father: "DINESH CHANDRA MEENA",
-      dob: "8/20/2011",
-      scholarNo: "1",
-      rollNo: "1",
-      class: "I",
-      unitTest: [
-        { subject: "ENGLISH", marks: [28, 15, 25, 49, 56, 173] },
-        { subject: "HINDI", marks: [27, 24, 18, 44, 57, 170] },
-        { subject: "MATHS", marks: [27, 25, 21, 42, 25, 140] },
-      ],
-      totalMarks: 200,
-      marksObtained: 150,
-      percentage: "85.5",
-      division: "First",
-      attendance: "329",
-      result: "Pass",
-      activities: [
-        ["Drawing", "A"],
-        ["Physical Ed.", "A"],
-      ],
-      remark: "",
-      promotion: "",
-      resultDate: "",
-    },
-    {
-      name: "TANVI MEGHWAL",
-      mother: "SONU MEGHWAL",
-      father: "SURESH MEGHWAL",
-      dob: "12/2/2011",
-      scholarNo: "2",
-      rollNo: "2",
-      class: "I",
-      unitTest: [
-        { subject: "ENGLISH", marks: [25, 27, 45, 55, 18, 170] },
-        { subject: "HINDI", marks: [26, 28, 45, 55, 16, 140] },
-        { subject: "MATHS", marks: [27, 24, 45, 55, 16, 130] },
-      ],
-      totalMarks: 200,
-      marksObtained: 170,
-      percentage: "85",
-      division: "First",
-      attendance: "85",
-      result: "Pass",
-      activities: [
-        ["Drawing", "A"],
-        ["Physical Ed.", "A"],
-      ],
-      remark: "",
-      promotion: "",
-      resultDate: "",
-    },
-    {
-      name: "MANISH TELI",
-      mother: "DHANVAR KUMARI",
-      father: "DURGA SUWAKA TELI",
-      dob: "7/11/2011",
-      scholarNo: "3",
-      rollNo: "3",
-      class: "I",
-      unitTest: [
-        { subject: "ENGLISH", marks: [28, 28, 46, 50, 18, 170] },
-        { subject: "HINDI", marks: [25, 26, 46, 50, 18, 160] },
-        { subject: "MATHS", marks: [26, 26, 46, 50, 15, 150] },
-      ],
-      totalMarks: 200,
-      marksObtained: 160,
-      percentage: "80",
-      division: "First",
-      attendance: "80",
-      result: "Pass",
-      activities: [
-        ["Drawing", "A"],
-        ["Physical Ed.", "A"],
-      ],
-      remark: "",
-      promotion: "",
-      resultDate: "",
-    },
-    {
-      name: "VICOM DAS MAHAJAT",
-      mother: "SUDHIRDHA MAHAJAT",
-      father: "NANDESHWAR DAS",
-      dob: "1/14/2012",
-      scholarNo: "4",
-      rollNo: "4",
-      class: "I",
-      unitTest: [
-        { subject: "ENGLISH", marks: [21, 27, 15, 66, 20, 129] },
-        { subject: "HINDI", marks: [22, 25, 15, 66, 20, 128] },
-        { subject: "MATHS", marks: [20, 20, 15, 66, 15, 125] },
-      ],
-      totalMarks: 200,
-      marksObtained: 172,
-      percentage: "61.5",
-      division: "Second",
-      attendance: "61.5",
-      result: "Pass",
-      activities: [
-        ["Drawing", "A"],
-        ["Physical Ed.", "A"],
-      ],
-      remark: "",
-      promotion: "",
-      resultDate: "",
-    },
-    {
-      name: "SURAJPAL SINGH SISODIYA",
-      mother: "SHIL SISODIYA",
-      father: "BALWANT SINGH SISODIYA",
-      dob: "6/25/2011",
-      scholarNo: "5",
-      rollNo: "5",
-      class: "I",
-      unitTest: [
-        { subject: "ENGLISH", marks: [21, 27, 15, 66, 20, 129] },
-        { subject: "HINDI", marks: [22, 25, 15, 66, 20, 128] },
-        { subject: "MATHS", marks: [25, 25, 15, 66, 15, 129] },
-      ],
-      totalMarks: 200,
-      marksObtained: 168,
-      percentage: "61.5",
-      division: "Second",
-      attendance: "61.5",
-      result: "Pass",
-      activities: [
-        ["Drawing", "A"],
-        ["Physical Ed.", "A"],
-      ],
-      remark: "",
-      promotion: "",
-      resultDate: "",
-    },
-  ];
+  return students.map((student, index) => {
+    const numOfMarks = student?.unitTest?.[index]?.marks?.length - 1;
 
-  return students.map((student, index) => (
-    <div key={index} className="space-y-2">
-      <div ref={(el) => (reportRefs.current[index] = el)}>
-        <ProgressReport studentDetail={student} />
+    const verticalSums = Array.from({ length: numOfMarks }, (_, i) =>
+      student?.unitTest?.reduce((sum, subj) => sum + subj.marks[i], 0)
+    );
+    const lastColumnSum = student?.unitTest?.reduce((sum, subject) => {
+      const lastMark = subject.marks[subject.marks.length - 1];
+      return sum + lastMark;
+    }, 0);
+
+    return (
+      <div key={index} className="space-y-2">
+        <div ref={(el) => (reportRefs.current[index] = el)}>
+          <ProgressReport
+            studentDetail={student}
+            verticalSums={verticalSums}
+            lastColumnSum={lastColumnSum}
+          />
+        </div>
+        <div className="text-center">
+          <button
+            onClick={() => handleDownload(index)}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Download Result as PDF
+          </button>
+        </div>
       </div>
-      <div className="text-center">
-        <button
-          onClick={() => handleDownload(index)}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Download Result as PDF
-        </button>
-      </div>
-    </div>
-  ));
+    );
+  });
 };
 
-const ProgressReport = ({ studentDetail }) => {
+const ProgressReport = ({ studentDetail, verticalSums, lastColumnSum }) => {
   return (
     <div className="max-w-fit mx-auto border p-4 text-xs font-serif">
       {/* Header */}
-      <div className="text-center border-b pb-2 mb-2 space-y-1">
+      <div className="text-center border-b pb-2 mb-2 space-y-1 relative">
         <h1 className="text-2xl font-bold uppercase ">
           Adarsh vidya niketan dariba
         </h1>
-        <p className="text-[14px]">
-          Sansera Road, Infront of Swarnkar Restaurant, Dariba,
-        </p>
-        <p className="text-[14px]">
+        <p className="text-[14px]">Dariba Near by Sanwaliya Seth Mandir</p>
+        {/* <p className="text-[14px]">
           Teh. Railmagra, Dist. Rajsamand, PIN - 313211
-        </p>
+        </p> */}
         {/* <p className="text-[14px]">
           Email: gayatrisansthan.dariba@gmail.com | Contact No.: 8233804104,
           9772240138
         </p> */}
-        <p className="text-[14px]">Affiliation No.: 142/92-93</p>
+        {/* <p className="text-[14px]">Affiliation No.: 142/92-93</p> */}
         <h2 className="text-[14px] font-bold mt-1 underline">
           Annual Progress Report
         </h2>
         <p className="text-[14px]">Session - 2024-25</p>
+
+        <img
+          className="absolute left-0  top-[-10px] w-[100px]"
+          src={LOGO}
+          alt="logo"
+        />
       </div>
 
       {/* Student Info */}
@@ -211,10 +95,10 @@ const ProgressReport = ({ studentDetail }) => {
             <strong className="text-[14px]">Name of Student:</strong>{" "}
             {studentDetail?.name}
           </p>
-          {/* <p className="text-[13px]">
+          <p className="text-[13px]">
             <strong className="text-[14px]">Mother's Name:</strong>{" "}
             {studentDetail?.mother}
-          </p> */}
+          </p>
           <p className="text-[13px]">
             <strong className="text-[14px]">Father's Name:</strong>
             {studentDetail?.father}
@@ -304,19 +188,19 @@ const ProgressReport = ({ studentDetail }) => {
           ))}
           <tr className="font-semibold">
             <td className="border border-black text-[14px] p-2">Total</td>
-            <td className="border border-black p-2">—</td>
-            <td className="border border-black p-2">—</td>
-            <td className="border border-black p-2">—</td>
-            <td className="border border-black p-2">—</td>
-            <td className="border border-black p-2">—</td>
-            <td className="border border-black p-2 font-sans text-[14px]">
-              {studentDetail?.totalMarks}
+            {verticalSums?.map((item, index) => (
+              <td className="border border-black p-2 font-sans text-[14px]">
+                {item}
+              </td>
+            ))}
+
+            <td className="border border-black p-2 font-sans text-[16px]">
+              {lastColumnSum}
             </td>
           </tr>
         </tbody>
       </table>
 
-      {/* Computer & GK */}
       <table className="w-full border border-black text-center mb-4">
         <thead>
           <tr className="bg-gray-100 uppercase">
@@ -336,7 +220,7 @@ const ProgressReport = ({ studentDetail }) => {
             </th>
             <th className="border border-black p-2 text-[13px]">Percentage</th>
             <th className="border border-black p-2 text-[13px]">Grade</th>
-            <th className="border border-black p-2 text-[13px]">Rank</th>
+            {/* <th className="border border-black p-2 text-[13px]">Rank</th> */}
             <th className="border border-black p-2 text-[13px]">Attendance</th>
             <th className="border border-black p-2 text-[13px]">Division</th>
             <th className="border border-black p-2 text-[13px]">Result</th>
@@ -362,9 +246,9 @@ const ProgressReport = ({ studentDetail }) => {
             <td className="border border-black p-2 font-sans text-[14px]">
               {studentDetail?.grade}
             </td>
-            <td className="border border-black p-2 font-sans text-[14px]">
+            {/* <td className="border border-black p-2 font-sans text-[14px]">
               {studentDetail?.rank}
-            </td>
+            </td> */}
             <td className="border border-black p-2 font-sans text-[14px]">
               {studentDetail?.attendance}
             </td>
@@ -388,12 +272,12 @@ const ProgressReport = ({ studentDetail }) => {
           <table className="w-full border border-black text-center mb-2">
             <thead>
               <tr className="bg-gray-100 uppercase">
-                <th className="border border-black text-[14px] p-2">A1</th>
-                <th className="border border-black text-[14px] p-2">A2</th>
-                <th className="border border-black text-[14px] p-2">B1</th>
-                <th className="border border-black text-[14px] p-2">B2</th>
-                <th className="border border-black text-[14px] p-2">C1</th>
-                <th className="border border-black text-[14px] p-2">C2</th>
+                <th className="border border-black text-[14px] p-2">A+</th>
+                <th className="border border-black text-[14px] p-2">A</th>
+                <th className="border border-black text-[14px] p-2">B+</th>
+                <th className="border border-black text-[14px] p-2">B</th>
+                <th className="border border-black text-[14px] p-2">C+</th>
+                <th className="border border-black text-[14px] p-2">C</th>
                 <th className="border border-black text-[14px] p-2">D</th>
                 <th className="border border-black text-[14px] p-2">E</th>
               </tr>
@@ -438,9 +322,9 @@ const ProgressReport = ({ studentDetail }) => {
               <th className="border border-black text-[14px] p-2">
                 Activities
               </th>
-              <th className="border border-black text-[14px] p-2">Quarterly</th>
-              <th className="border border-black text-[14px] p-2">SA-I</th>
-              <th className="border border-black text-[14px] p-2">SA-II</th>
+              <th className="border border-black text-[14px] p-2">Annual</th>
+              {/* <th className="border border-black text-[14px] p-2">SA-I</th>
+              <th className="border border-black text-[14px] p-2">SA-II</th> */}
             </tr>
           </thead>
           <tbody>
@@ -450,8 +334,8 @@ const ProgressReport = ({ studentDetail }) => {
                   {activity}
                 </td>
                 <td className="border border-black text-[14px] p-2">{q}</td>
-                <td className="border border-black text-[14px] p-2">{h}</td>
-                <td className="border border-black text-[14px] p-2">{a}</td>
+                {/* <td className="border border-black text-[14px] p-2">{h}</td>
+                <td className="border border-black text-[14px] p-2">{a}</td> */}
               </tr>
             ))}
           </tbody>
@@ -462,7 +346,7 @@ const ProgressReport = ({ studentDetail }) => {
       <div className="mb-2 uppercase text-nowrap">
         <p className="text-[14px]">
           <strong className="text-[16px]">Teacher's Remark:</strong>{" "}
-          {studentDetail?.remark}
+          {gradeRemarks[studentDetail.grade]}
         </p>
       </div>
 
@@ -477,7 +361,7 @@ const ProgressReport = ({ studentDetail }) => {
                 <p className="font-semibold font-sans">
                   {studentDetail?.resultDate}
                 </p>
-                <p className="text-gray-700 mt-1 border-t border-black pt-4">
+                <p className="text-gray-700 mt-2 border-t border-black grid place-content-center">
                   RESULT DATE
                 </p>
               </td>
